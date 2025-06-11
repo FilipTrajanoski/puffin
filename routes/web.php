@@ -1,18 +1,14 @@
 <?php
 
+use App\Http\Controllers\InvitesController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\TripController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+    return Inertia::render('Home');
+})->name('home');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
@@ -22,6 +18,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/trips', [TripController::class, 'index'])->name('trips.index');
+    Route::get('/trips/invites', [InvitesController::class, 'index'])->name('trips.invites');
+    Route::get('/trips/create', [TripController::class, 'create'])->name('trips.create');
+    Route::get('/trips/{trip}', [TripController::class, 'show'])->name('trips.show');
+    Route::post('/trips', [TripController::class, 'store'])->name('trips.store');
+    Route::put('/trips/{trip}', [TripController::class, 'update'])->name('trips.update');
+    Route::post('/trips/{trip}/accept', [TripController::class, 'accept'])->name('trips.accept');
+    Route::delete('/trips/{trip}/decline', [TripController::class, 'decline'])->name('trips.decline');
 });
 
 require __DIR__.'/auth.php';

@@ -60,4 +60,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Trip::class, 'creator_id');
     }
+
+    public function pendingTripInvites()
+    {
+        return $this->belongsToMany(Trip::class)
+            ->withPivot('accepted')
+            ->wherePivot('accepted', false);
+    }
 }

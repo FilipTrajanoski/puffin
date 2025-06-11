@@ -17,9 +17,9 @@ defineProps({
 });
 
 const form = useForm({
-    login: '',
-    password: '',
-    remember: false,
+    login: 'filip',
+    password: '11111111',
+    remember: true,
 });
 
 const submit = () => {
