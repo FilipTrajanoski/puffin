@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\Currency;
+use App\Events\TripInviteEvent;
 use App\Http\Requests\TripRequest;
 use App\Http\Requests\TripUpdateRequest;
 use App\Models\Trip;
@@ -66,11 +67,14 @@ class TripController extends Controller
             'currency' => $validated['currency'],
         ]);
 
-        if(!empty($validated['usernames'])){
+        if (!empty($validated['usernames'])) {
             $usersToInvite = User::whereIn('username', $validated['usernames'])->get();
 
-            foreach($usersToInvite as $user){
+            foreach ($usersToInvite as $user) {
                 $trip->participants()->attach($user->id, ['accepted' => false]);
+
+                $count = $user->pendingTripInvites()->count();
+                broadcast(new TripInviteEvent($user->id, $count))->toOthers();
             }
         }
 
@@ -91,6 +95,9 @@ class TripController extends Controller
             foreach ($usersToInvite as $user) {
                 if (!$trip->participants->contains($user->id)) {
                     $trip->participants()->attach($user->id, ['accepted' => false]);
+
+                    broadcast(new TripInviteEvent($user->id, $user->pendingTripInvites()->count()))
+                        ->toOthers();
                 }
             }
         }

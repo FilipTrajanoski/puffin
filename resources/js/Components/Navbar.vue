@@ -5,6 +5,7 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from "@/Components/NavLink.vue";
+import InviteCounter from "@/Components/InviteCounter.vue";
 
 const showingNavigationDropdown = ref(false);
 const page = usePage();
@@ -16,19 +17,24 @@ const user = computed(() => page.props.auth.user);
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <!-- Logo -->
-                <div class="flex items-center">
+                <div class="flex items-center space-x-4">
                     <Link :href="route('home')">
                         <ApplicationLogo class="block h-14 w-auto text-gray-800" />
                     </Link>
-                    <NavLink :href="route('trips.index')" :active="route().current('trips.index')">
-                        My Trips
-                    </NavLink>
-                    <NavLink :href="route('trips.invites')" :active="route().current('trips.invites')">
-                        Invites
-                    </NavLink>
+
+                    <!-- Navigation Links - Desktop -->
+                    <div class="hidden sm:flex sm:items-center sm:space-x-4">
+                        <NavLink :href="route('trips.index')" :active="route().current('trips.index')">
+                            My Trips
+                        </NavLink>
+                        <NavLink :href="route('trips.invites')" :active="route().current('trips.invites')" class="relative">
+                            Invites
+                            <InviteCounter />
+                        </NavLink>
+                    </div>
                 </div>
 
-                <!-- Desktop Nav -->
+                <!-- Desktop Nav (User Section) -->
                 <div class="hidden sm:flex sm:items-center sm:gap-6">
                     <template v-if="user">
                         <Dropdown align="right" width="48">
@@ -80,7 +86,28 @@ const user = computed(() => page.props.auth.user);
         </div>
 
         <!-- Mobile Menu -->
-        <div v-if="showingNavigationDropdown" class="sm:hidden px-4 pt-2 pb-4">
+        <div v-if="showingNavigationDropdown" class="sm:hidden px-4 pt-2 pb-4 space-y-2">
+            <Link
+                :href="route('trips.index')"
+                class="block py-2 text-sm text-gray-600 hover:text-blue-600"
+                :class="{ 'text-blue-600': route().current('trips.index') }"
+            >
+                My Trips
+            </Link>
+            <Link
+                :href="route('trips.invites')"
+                class="block py-2 text-sm text-gray-600 hover:text-blue-600 relative"
+                :class="{ 'text-blue-600': route().current('trips.invites') }"
+            >
+                Invites
+                <span
+                    v-if="user && user.pending_invites_count > 0"
+                    class="absolute top-2 right-0 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-600 rounded-full"
+                >
+                    {{ user.pending_invites_count }}
+                </span>
+            </Link>
+
             <template v-if="user">
                 <Link :href="route('profile.edit')" class="block py-2 text-sm text-gray-600 hover:text-blue-600">Profile</Link>
                 <Link :href="route('logout')" method="post" as="button" class="block py-2 text-sm text-red-600 hover:underline">Log Out</Link>
