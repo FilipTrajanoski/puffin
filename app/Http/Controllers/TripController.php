@@ -33,7 +33,7 @@ class TripController extends Controller
             ->latest()
             ->get();
 
-        return Inertia::render('Trips/Index', [
+        return Inertia::render('Trips/Sidebar', [
             'acceptedTrips' => $acceptedTrips,
             'pendingInvites' => $pendingInvites,
         ]);
