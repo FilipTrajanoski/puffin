@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { ref, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
     trip: Object
@@ -14,6 +14,9 @@ const participantForm = useForm({
 
 // Track which fields have been filled
 const filledFields = ref([]);
+
+// Add real-time trip updates
+const tripData = ref({...props.trip});
 
 // Add a new username input field
 const addUsernameField = () => {
@@ -57,15 +60,36 @@ const submitForm = () => {
         usernames: nonEmptyUsernames
     })).put(route('trips.update', props.trip.id));
 };
+
+// Listen for trip updates
+onMounted(() => {
+    window.Echo.private(`trip-updates.${props.trip.id}`)
+        .listen('.TripUpdatedEvent', (e) => {
+            console.log('Received TripUpdatedEvent, refreshing trip data...');
+            // Refresh trip data
+            router.reload({
+                only: ['trip'],
+                preserveState: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                    tripData.value = {...props.trip};
+                }
+            });
+        });
+});
+
+onUnmounted(() => {
+    window.Echo.leave(`trip-updates.${props.trip.id}`);
+});
 </script>
 
 <template>
-    <Head :title="trip.title" />
+    <Head :title="tripData.title"/>
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                {{ trip.title }}
+                {{ tripData.title }}
             </h2>
         </template>
 
@@ -74,7 +98,8 @@ const submitForm = () => {
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6 bg-white border-b border-gray-200">
                         <!-- Form Errors -->
-                        <div v-if="Object.keys(participantForm.errors).length" class="p-4 mb-4 text-red-700 bg-red-100 rounded">
+                        <div v-if="Object.keys(participantForm.errors).length"
+                             class="p-4 mb-4 text-red-700 bg-red-100 rounded">
                             <p v-for="(error, field) in participantForm.errors" :key="field" class="text-sm">
                                 <span v-if="field.includes('usernames')">
                                     {{ error.replace('The selected', '') }}
@@ -85,22 +110,17 @@ const submitForm = () => {
                             </p>
                         </div>
 
-<!--                        &lt;!&ndash; Success Message &ndash;&gt;-->
-<!--                        <div v-if="$page.props.flash.message" class="p-4 mb-4 text-green-700 bg-green-100 rounded">-->
-<!--                            {{ $page.props.flash.message }}-->
-<!--                        </div>-->
-
                         <!-- Trip Information -->
                         <div class="mb-6">
                             <h3 class="text-lg font-medium">Trip Information</h3>
                             <div class="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2">
                                 <div>
                                     <p class="text-sm text-gray-500">Currency</p>
-                                    <p class="font-medium">{{ trip.currency }}</p>
+                                    <p class="font-medium">{{ tripData.currency }}</p>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Created By</p>
-                                    <p class="font-medium">{{ trip.creator.name }}</p>
+                                    <p class="font-medium">{{ tripData.creator.name }}</p>
                                 </div>
                             </div>
                         </div>
@@ -110,24 +130,24 @@ const submitForm = () => {
                             <h3 class="flex items-center text-lg font-medium">
                                 Participants
                                 <span class="ml-2 text-sm text-gray-500">
-                                    ({{ trip.accepted_participants.length }} accepted,
-                                    {{ trip.pending_invites.length }} pending)
+                                    ({{ tripData.accepted_participants.length }} accepted,
+                                    {{ tripData.pending_invites.length }} pending)
                                 </span>
                             </h3>
 
                             <div class="mt-4">
                                 <h4 class="mb-2 font-medium text-gray-700">Accepted</h4>
                                 <ul class="pl-5 mb-4 list-disc">
-                                    <li v-for="user in trip.accepted_participants" :key="user.id">
+                                    <li v-for="user in tripData.accepted_participants" :key="user.id">
                                         {{ user.name }} (@{{ user.username }})
                                     </li>
                                 </ul>
 
-                                <h4 class="mb-2 font-medium text-gray-700" v-if="trip.pending_invites.length">
+                                <h4 class="mb-2 font-medium text-gray-700" v-if="tripData.pending_invites.length">
                                     Pending Invites
                                 </h4>
                                 <ul class="pl-5 mb-4 list-disc">
-                                    <li v-for="user in trip.pending_invites" :key="user.id">
+                                    <li v-for="user in tripData.pending_invites" :key="user.id">
                                         {{ user.name }} (@{{ user.username }})
                                     </li>
                                 </ul>
@@ -142,7 +162,8 @@ const submitForm = () => {
                                         Invite More Participants
                                     </label>
 
-                                    <div v-for="(username, index) in participantForm.usernames" :key="index" class="flex items-center mb-2">
+                                    <div v-for="(username, index) in participantForm.usernames" :key="index"
+                                         class="flex items-center mb-2">
                                         <!-- Display field in view mode when filled -->
                                         <div v-if="filledFields[index]" class="flex items-center w-full">
                                             <span class="px-3 py-2 bg-gray-100 rounded-md">
@@ -190,6 +211,15 @@ const submitForm = () => {
                                     <p class="mt-2 text-sm text-gray-500">
                                         Add participants by username
                                     </p>
+                                </div>
+
+                                <div class="pt-4 mt-6 border-t">
+                                    <Link
+                                        :href="route('trips.expenses.index', trip.id)"
+                                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
+                                    >
+                                        View Expenses
+                                    </Link>
                                 </div>
 
                                 <div class="flex items-center justify-between">

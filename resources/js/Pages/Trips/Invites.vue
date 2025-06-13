@@ -1,9 +1,27 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3'; // Import router instead of Inertia
+import {Head, router, usePage} from '@inertiajs/vue3';
+import {onMounted, onUnmounted, ref} from "vue"; // Import router instead of Inertia
 
-defineProps({
+const props = defineProps({
     pendingInvites: Array
+});
+
+const invites = ref([...props.pendingInvites]);
+
+onMounted(() => {
+    const userId = usePage().props.auth.user.id;
+
+    window.Echo.private(`trip-invites.${userId}`)
+        .listen('.TripInviteEvent', (e) => {
+            // Refresh the invites list
+            router.reload({ only: ['pendingInvites'] });
+        });
+});
+
+onUnmounted(() => {
+    const userId = usePage().props.auth.user.id;
+    window.Echo.leave(`trip-invites.${userId}`);
 });
 
 const acceptInvite = (tripId) => {

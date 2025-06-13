@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\Currency;
 use App\Events\TripInviteEvent;
+use App\Events\TripUpdatedEvent;
 use App\Http\Requests\TripRequest;
 use App\Http\Requests\TripUpdateRequest;
 use App\Models\Trip;
@@ -73,8 +74,7 @@ class TripController extends Controller
             foreach ($usersToInvite as $user) {
                 $trip->participants()->attach($user->id, ['accepted' => false]);
 
-                $count = $user->pendingTripInvites()->count();
-                broadcast(new TripInviteEvent($user->id, $count))->toOthers();
+                $this->updateInviteCount($user);
             }
         }
 
@@ -96,8 +96,8 @@ class TripController extends Controller
                 if (!$trip->participants->contains($user->id)) {
                     $trip->participants()->attach($user->id, ['accepted' => false]);
 
-                    broadcast(new TripInviteEvent($user->id, $user->pendingTripInvites()->count()))
-                        ->toOthers();
+                    $this->updateInviteCount($user);
+                    $this->updateTrip($trip->id);
                 }
             }
         }
@@ -111,6 +111,9 @@ class TripController extends Controller
 
         $trip->participants()->updateExistingPivot($user->id, ['accepted' => true]);
 
+        $this->updateInviteCount($user);
+        $this->updateTrip($trip->id);
+
         return redirect()->route('trips.show', $trip);
     }
 
@@ -120,6 +123,20 @@ class TripController extends Controller
 
         $trip->participants()->detach($user->id);
 
+        $this->updateInviteCount($user);
+        $this->updateTrip($trip->id);
+
         return redirect()->route('trips.invites')->with('message', 'Invite declined');
+    }
+
+    private function updateInviteCount($user): void
+    {
+        broadcast(new TripInviteEvent($user->id, $user->pendingTripInvites()->count()))
+            ->toOthers();
+    }
+
+    private function updateTrip($tripId): void
+    {
+        broadcast(new TripUpdatedEvent($tripId))->toOthers();
     }
 }

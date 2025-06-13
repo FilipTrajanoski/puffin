@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InvitesController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TripController;
@@ -29,6 +30,10 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/trips/{trip}', [TripController::class, 'update'])->name('trips.update');
     Route::post('/trips/{trip}/accept', [TripController::class, 'accept'])->name('trips.accept');
     Route::delete('/trips/{trip}/decline', [TripController::class, 'decline'])->name('trips.decline');
+
+    Route::get('/trips/{trip}/expenses', [ExpenseController::class, 'index'])->name('trips.expenses.index');
+    Route::get('/trips/{trip}/expenses/create', [ExpenseController::class, 'create'])->name('trips.expenses.create');
+    Route::post('/trips/{trip}/expenses', [ExpenseController::class, 'store'])->name('trips.expenses.store');
 });
 
 require __DIR__.'/auth.php';

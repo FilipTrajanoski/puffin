@@ -6,6 +6,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from "@/Components/NavLink.vue";
 import InviteCounter from "@/Components/InviteCounter.vue";
+import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
 
 const showingNavigationDropdown = ref(false);
 const page = usePage();
@@ -24,13 +25,13 @@ const user = computed(() => page.props.auth.user);
 
                     <!-- Navigation Links - Desktop -->
                     <div class="hidden sm:flex sm:items-center sm:space-x-4">
-                        <NavLink :href="route('trips.index')" :active="route().current('trips.index')">
+                        <ResponsiveNavLink :href="route('trips.index')" :active="route().current('trips.index')">
                             My Trips
-                        </NavLink>
-                        <NavLink :href="route('trips.invites')" :active="route().current('trips.invites')" class="relative">
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('trips.invites')" :active="route().current('trips.invites')" class="relative">
                             Invites
                             <InviteCounter />
-                        </NavLink>
+                        </ResponsiveNavLink>
                     </div>
                 </div>
 
