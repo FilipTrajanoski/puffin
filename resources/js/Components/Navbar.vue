@@ -19,7 +19,7 @@ const user = computed(() => page.props.auth.user);
             <div class="flex justify-between h-16 items-center">
                 <!-- Logo -->
                 <div class="flex items-center space-x-4">
-                    <Link :href="route('home')">
+                    <Link :href="route('trips.index')">
                         <ApplicationLogo class="block h-14 w-auto text-gray-800 dark:text-gray-200" />
                     </Link>
 

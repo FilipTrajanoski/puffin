@@ -88,9 +88,19 @@ onUnmounted(() => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                {{ tripData.title }}
-            </h2>
+            <div class="flex items-center">
+                <Link 
+                    :href="route('trips.index')"
+                    class="mr-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                >
+                    <svg class="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                </Link>
+                <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+                    {{ tripData.title }}
+                </h2>
+            </div>
         </template>
 
         <div class="py-6">
@@ -219,16 +229,10 @@ onUnmounted(() => {
                                         class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition-colors"
                                     >
                                         View Expenses
-                                    </Link>
+                                    </Link> 
                                 </div>
 
-                                <div class="flex items-center justify-between">
-                                    <Link
-                                        :href="route('trips.index')"
-                                        class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                                    >
-                                        Back to Trips
-                                    </Link>
+                                <div class="flex items-center justify-end">  <!-- Changed from justify-between to justify-end -->
                                     <button
                                         type="submit"
                                         class="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-500 transition-colors"

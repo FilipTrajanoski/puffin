@@ -3,40 +3,15 @@ import { Head } from '@inertiajs/vue3';
 import Sidebar from '@/Pages/Trips/Sidebar.vue'
 import HomeLayout from '@/Layouts/HomeLayout.vue';
 
-const trip = {
-  id: "1",
-  creatorId: "124",
-  title: "124",
-  currency: "124",
-  createdAt: "124",
-  updatedAt: "124",
-};
-const tripTwo = {
-  id: "2",
-  creatorId: "224",
-  title: "224",
-  currency: "224",
-  createdAt: "224",
-  updatedAt: "224",
-};
-let selected = null;
-
 function select(id) {
   this.selected = id;
 };
-
-const acceptedTrips = [trip, tripTwo];
 </script>
 
 <template>
   <Head title="Home" />
   <HomeLayout>
     <div class="container bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-      <Sidebar
-        :acceptedTrips="acceptedTrips"
-        :selected="selected"
-        class="sidebar"
-      />
     </div>
   </HomeLayout>
 </template>
