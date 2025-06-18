@@ -10,14 +10,14 @@ const showingNavigationDropdown = ref(false);
         <Navbar />
 
         <!-- Page Heading -->
-        <header
-            class="text-center bg-header-gradiant"
-            v-if="$slots.header"
-        >
-            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                <slot name="header"/>
-            </div>
-        </header>
+<!--        <header-->
+<!--            class="text-center"-->
+<!--            v-if="$slots.header"-->
+<!--        >-->
+<!--            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">-->
+<!--                <slot name="header"/>-->
+<!--            </div>-->
+<!--        </header>-->
 
         <!-- Page Content -->
         <main class="flex-grow transition-colors duration-300 bg-primary-light">

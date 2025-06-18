@@ -62,8 +62,5 @@
 .hover\:bg-primary-dark:hover { background-color: var(--primary-dark); }
 .focus\:ring-primary:focus { ring-color: var(--primary-light); }
 
-/*.bg-header-gradiant {*/
-/*    background-color: var(--primary-mid); !* fallback *!*/
-/*    background-image: linear-gradient(to bottom, var(--primary), var(--primary-light)) !important;*/
-/*}*/
-
+.text-danger { color: var(--danger); }
+.text-success { color: var(--success); }

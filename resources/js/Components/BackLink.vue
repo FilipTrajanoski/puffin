@@ -10,6 +10,10 @@ const props = defineProps({
     params: {
         type: Object,
         default: () => ({})
+    },
+    text: {
+        type: String,
+        default: 'Back'
     }
 })
 
@@ -20,14 +24,13 @@ const href = computed(() => route(props.backRoute, props.params))
 <template>
     <Link
         :href="href"
-        class="mr-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+        class="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
     >
-        <svg class="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+                  d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                  clip-rule="evenodd"/>
         </svg>
+        {{ text }}
     </Link>
 </template>
-
-<style scoped>
-
-</style>
