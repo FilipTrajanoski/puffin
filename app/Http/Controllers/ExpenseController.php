@@ -46,8 +46,6 @@ class ExpenseController extends Controller
     public function store(ExpenseRequest $request, Trip $trip): RedirectResponse
     {
         $this->authorize('create', [Expense::class, $trip]);
-
-
         $validated = $request->validated();
 
         // Create expense
@@ -59,13 +57,17 @@ class ExpenseController extends Controller
             'split_method' => $validated['split_method'],
         ]);
 
-        // Add participants with their shares
         $totalShares = array_sum($validated['shares']);
+        $paidBy = $validated['paid_by'];
 
         foreach ($validated['shares'] as $userId => $share) {
+            // Calculate share amount
             $shareAmount = ($share / $totalShares) * $validated['amount'];
-            $paidShare = $userId == $validated['paid_by'] ? $shareAmount : 0;
-            $owedShare = $userId == $validated['paid_by'] ? 0 : $shareAmount;
+
+            // For payer: they paid the full amount but only owe their share
+            // For others: they paid nothing but owe their full share
+            $paidShare = ($userId == $paidBy) ? $validated['amount'] : 0;
+            $owedShare = $shareAmount;
 
             $expense->participants()->attach($userId, [
                 'share' => $share,
@@ -87,20 +89,23 @@ class ExpenseController extends Controller
             $balances[$participant->id] = 0;
         }
 
-        // Calculate net balances
+        // Calculate net balances (payer gets credit for full amount,
+        // everyone gets debit for their share)
         foreach ($trip->expenses as $expense) {
+            // Credit payer for full amount
+            $balances[$expense->paid_by] += $expense->amount;
+
+            // Debit each participant for their share
             foreach ($expense->participants as $participant) {
-                $balances[$participant->id] += $participant->pivot->paid_share;
                 $balances[$participant->id] -= $participant->pivot->owed_share;
             }
         }
 
-        // Simplify debts
+        // Simplify debts (existing implementation is correct)
         $settlements = [];
         $positive = [];
         $negative = [];
 
-        // Separate into debtors and creditors
         foreach ($balances as $userId => $balance) {
             if ($balance > 0) {
                 $positive[] = ['user_id' => $userId, 'amount' => $balance];
@@ -109,7 +114,6 @@ class ExpenseController extends Controller
             }
         }
 
-        // Calculate who owes whom
         foreach ($positive as &$creditor) {
             foreach ($negative as &$debtor) {
                 if ($debtor['amount'] > 0 && $creditor['amount'] > 0) {

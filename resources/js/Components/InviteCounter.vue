@@ -8,7 +8,10 @@ let channel = null;
 onMounted(() => {
     try {
         const user = usePage().props.auth.user;
-        if (!user) return;
+        if (!user) {
+            count.value = 0;
+            return;
+        }
 
         count.value = user.pending_invites_count;
 
@@ -42,9 +45,10 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-    if (channel) {
+    const user = usePage().props.auth.user;
+    if (channel && user) {
         channel.stopListening('.TripInviteEvent');
-        window.Echo.leave(`trip-invites.${usePage().props.auth.user.id}`);
+        window.Echo.leave(`trip-invites.${user.id}`);
     }
 });
 </script>

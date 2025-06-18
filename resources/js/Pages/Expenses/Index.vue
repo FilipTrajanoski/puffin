@@ -1,6 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import {Head, Link} from '@inertiajs/vue3';
+import BackLink from "@/Components/BackLink.vue";
 
 defineProps({
     trip: Object,
@@ -19,11 +20,12 @@ const formatCurrency = (amount, currency) => {
 </script>
 
 <template>
-    <Head :title="`${trip.title} Expenses`" />
+    <Head :title="`${trip.title} Expenses`"/>
 
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
+                <BackLink back-route="trips.show" :params="{trip: trip.id}"/>
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
                     {{ trip.title }} Expenses
                 </h2>
@@ -43,19 +45,25 @@ const formatCurrency = (amount, currency) => {
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow transition-colors">
                         <h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Expenses</h3>
                         <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                            {{ formatCurrency(expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0), trip.currency) }}
+                            {{
+                                formatCurrency(expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0), trip.currency)
+                            }}
                         </p>
                     </div>
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow transition-colors">
                         <h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium">You Owe</h3>
                         <p class="text-2xl font-semibold text-red-600 dark:text-red-400">
-                            {{ formatCurrency(settlements.filter(s => s.from === $page.props.auth.user.id).reduce((sum, s) => sum + s.amount, 0), trip.currency) }}
+                            {{
+                                formatCurrency(settlements.filter(s => s.from === $page.props.auth.user.id).reduce((sum, s) => sum + s.amount, 0), trip.currency)
+                            }}
                         </p>
                     </div>
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow transition-colors">
                         <h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium">You Are Owed</h3>
                         <p class="text-2xl font-semibold text-green-600 dark:text-green-400">
-                            {{ formatCurrency(settlements.filter(s => s.to === $page.props.auth.user.id).reduce((sum, s) => sum + s.amount, 0), trip.currency) }}
+                            {{
+                                formatCurrency(settlements.filter(s => s.to === $page.props.auth.user.id).reduce((sum, s) => sum + s.amount, 0), trip.currency)
+                            }}
                         </p>
                     </div>
                 </div>
@@ -68,7 +76,8 @@ const formatCurrency = (amount, currency) => {
                             No settlements needed - all expenses are balanced.
                         </div>
                         <ul v-else class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <li v-for="settlement in settlements" :key="settlement.from + '-' + settlement.to" class="py-3">
+                            <li v-for="settlement in settlements" :key="settlement.from + '-' + settlement.to"
+                                class="py-3">
                                 <div class="flex items-center">
                                     <span class="text-gray-600 dark:text-gray-300">
                                         {{ participants.find(p => p.id === settlement.from).name }}
@@ -97,14 +106,17 @@ const formatCurrency = (amount, currency) => {
                             <li v-for="expense in expenses" :key="expense.id" class="py-4">
                                 <div class="flex justify-between">
                                     <div>
-                                        <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ expense.description }}</h4>
+                                        <h4 class="font-medium text-gray-900 dark:text-gray-100">{{
+                                                expense.description
+                                            }}</h4>
                                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                                            Paid by {{ expense.payer.name }} on {{ new Date(expense.date).toLocaleDateString() }}
+                                            Paid by {{ expense.payer.name }} on
+                                            {{ new Date(expense.date).toLocaleDateString() }}
                                         </p>
                                     </div>
                                     <div class="text-right">
                                         <p class="font-medium text-gray-900 dark:text-gray-100">
-                                            {{ formatCurrency(expense.amount, expense.currency) }}
+                                            {{ formatCurrency(expense.amount, trip.currency) }}
                                         </p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400">
                                             {{ expense.split_method }} split

@@ -14,7 +14,7 @@ const user = computed(() => page.props.auth.user);
 </script>
 
 <template>
-    <nav class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 transition-colors duration-300">
+    <nav class="bg-white dark:bg-gray-800 transition-colors duration-300 bg-primary">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <!-- Logo -->
@@ -25,26 +25,26 @@ const user = computed(() => page.props.auth.user);
 
                     <!-- Navigation Links - Desktop -->
                     <div class="hidden sm:flex sm:items-center sm:space-x-4">
-                        <ResponsiveNavLink 
-                            :href="route('trips.index')" 
+                        <ResponsiveNavLink
+                            :href="route('trips.index')"
                             :active="route().current('trips.index')"
-                            class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            class="px-3 py-2 rounded-md font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             :class="{
                                 'text-blue-600 dark:text-blue-400 bg-gray-100/50 dark:bg-gray-700/50': route().current('trips.index')
                             }"
                         >
                             My Trips
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink 
-                            :href="route('trips.invites')" 
-                            :active="route().current('trips.invites')" 
-                            class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative"
+                        <ResponsiveNavLink
+                            :href="route('trips.invites')"
+                            :active="route().current('trips.invites')"
+                            class="px-3 py-2 rounded-md font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative"
                             :class="{
                                 'text-blue-600 dark:text-blue-400 bg-gray-100/50 dark:bg-gray-700/50': route().current('trips.invites')
                             }"
                         >
                             Invites
-                            <InviteCounter />
+                            <InviteCounter v-if="user"/>
                         </ResponsiveNavLink>
                     </div>
                 </div>
@@ -81,7 +81,7 @@ const user = computed(() => page.props.auth.user);
                 <div class="sm:hidden">
                     <button
                         @click="showingNavigationDropdown = !showingNavigationDropdown"
-                        class="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors"
+                        class="p-2 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -105,8 +105,8 @@ const user = computed(() => page.props.auth.user);
         </div>
 
         <!-- Mobile Menu -->
-        <div 
-            v-if="showingNavigationDropdown" 
+        <div
+            v-if="showingNavigationDropdown"
             class="sm:hidden px-4 pt-2 pb-4 space-y-2 bg-white dark:bg-gray-800 transition-colors duration-300"
         >
             <Link
@@ -135,30 +135,30 @@ const user = computed(() => page.props.auth.user);
             </Link>
 
             <template v-if="user">
-                <Link 
-                    :href="route('profile.edit')" 
+                <Link
+                    :href="route('profile.edit')"
                     class="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
                     Profile
                 </Link>
-                <Link 
-                    :href="route('logout')" 
-                    method="post" 
-                    as="button" 
+                <Link
+                    :href="route('logout')"
+                    method="post"
+                    as="button"
                     class="block w-full text-left px-3 py-2 rounded-md text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                 >
                     Log Out
                 </Link>
             </template>
             <template v-else>
-                <Link 
-                    href="/login" 
+                <Link
+                    href="/login"
                     class="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
                     Login
                 </Link>
-                <Link 
-                    href="/register" 
+                <Link
+                    href="/register"
                     class="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
                     Register

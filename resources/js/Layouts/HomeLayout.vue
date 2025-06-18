@@ -16,7 +16,7 @@ function isActive(routeName) {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300 bg-primary">
         <Navbar />
 
         <!-- Page Content -->

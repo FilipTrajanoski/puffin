@@ -1,6 +1,5 @@
 <script setup>
 import { Head } from '@inertiajs/vue3';
-import Sidebar from '@/Pages/Trips/Sidebar.vue'
 import HomeLayout from '@/Layouts/HomeLayout.vue';
 
 function select(id) {
@@ -11,7 +10,7 @@ function select(id) {
 <template>
   <Head title="Home" />
   <HomeLayout>
-    <div class="container bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <div class="container transition-colors duration-300">
     </div>
   </HomeLayout>
 </template>
@@ -21,7 +20,7 @@ function select(id) {
   display: flex;
   flex-grow: 1;
   justify-content: space-between;
-  min-height: calc(100vh - 4rem);
+  //min-height: calc(100vh - 4rem);
 }
 
 .sidebar {
@@ -51,13 +50,13 @@ function select(id) {
   .container {
     flex-direction: column;
   }
-  
+
   .sidebar,
   .tripExpenses {
     width: 100%;
     margin-left: 0;
   }
-  
+
   .tripExpenses {
     margin-top: 20px;
   }

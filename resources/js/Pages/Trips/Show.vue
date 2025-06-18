@@ -2,6 +2,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted } from 'vue';
+import BackLink from "@/Components/BackLink.vue";
+import { usePage } from '@inertiajs/vue3';
+
+
+const authUser = usePage().props.auth.user;
 
 const props = defineProps({
     trip: Object
@@ -31,7 +36,7 @@ const addUsernameField = () => {
     participantForm.usernames.push('');
     filledFields.value.push(false);
 };
-    
+
 // Remove a username field
 const removeUsernameField = (index) => {
     if (participantForm.usernames.length > 1) {
@@ -89,14 +94,8 @@ onUnmounted(() => {
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center">
-                <Link 
-                    :href="route('trips.index')"
-                    class="mr-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                >
-                    <svg class="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                    </svg>
-                </Link>
+                <BackLink back-route="trips.index"/>
+
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
                     {{ tripData.title }}
                 </h2>
@@ -165,7 +164,8 @@ onUnmounted(() => {
                         </div>
 
                         <!-- Invite More Participants Form -->
-                        <div class="pt-4 mt-6 border-t border-gray-200 dark:border-gray-700">
+                        <div v-if="authUser && authUser.id === tripData.creator.id"
+                            class="pt-4 mt-6 border-t border-gray-200 dark:border-gray-700">
                             <form @submit.prevent="submitForm">
                                 <div class="mb-4">
                                     <label class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -223,14 +223,6 @@ onUnmounted(() => {
                                     </p>
                                 </div>
 
-                                <div class="pt-4 mt-6 border-t border-gray-200 dark:border-gray-700">
-                                    <Link
-                                        :href="route('trips.expenses.index', trip.id)"
-                                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition-colors"
-                                    >
-                                        View Expenses
-                                    </Link> 
-                                </div>
 
                                 <div class="flex items-center justify-end">  <!-- Changed from justify-between to justify-end -->
                                     <button
@@ -242,6 +234,14 @@ onUnmounted(() => {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                        <div class="pt-4 mt-6 border-t border-gray-200 dark:border-gray-700">
+                            <Link
+                                :href="route('trips.expenses.index', trip.id)"
+                                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition-colors"
+                            >
+                                View Expenses
+                            </Link>
                         </div>
                     </div>
                 </div>

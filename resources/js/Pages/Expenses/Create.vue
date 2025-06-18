@@ -1,12 +1,11 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
+import {Head, Link, useForm} from '@inertiajs/vue3';
+import {computed, ref, watch} from 'vue';
 
 const props = defineProps({
     trip: Object,
-    participants: Array,
-    currencies: Array
+    participants: Array
 });
 
 const form = useForm({
@@ -19,10 +18,26 @@ const form = useForm({
     shares: {}
 });
 
-// Initialize shares
-props.participants.forEach(participant => {
-    form.shares[participant.id] = participant.id === form.paid_by ? 100 : 0;
-});
+// Initialize shares properly
+const initializeShares = () => {
+    if (form.split_method === 'equal') {
+        const sharePerPerson = 100 / props.participants.length;
+        props.participants.forEach(participant => {
+            form.shares[participant.id] = sharePerPerson;
+        });
+    } else if (form.split_method === 'percentage') {
+        props.participants.forEach(participant => {
+            form.shares[participant.id] = participant.id === form.paid_by ? 100 : 0;
+        });
+    } else { // custom
+        props.participants.forEach(participant => {
+            form.shares[participant.id] = 0;
+        });
+    }
+};
+
+// Initialize on component creation
+initializeShares();
 
 // Calculate shares when method changes
 watch(() => form.split_method, (method) => {
@@ -39,9 +54,20 @@ watch(() => form.split_method, (method) => {
     });
 });
 
-// Calculate total share percentage
 const totalShare = computed(() => {
-    return Object.values(form.shares).reduce((sum, share) => sum + parseFloat(share || 0), 0);
+    if (form.split_method === 'custom') {
+        // For custom method, total is sum of all custom amounts
+        return Object.values(form.shares).reduce(
+            (sum, share) => sum + parseFloat(share || 0),
+            0
+        );
+    } else {
+        // For equal/percentage, total is sum of percentages
+        return Object.values(form.shares).reduce(
+            (sum, share) => sum + parseFloat(share || 0),
+            0
+        );
+    }
 });
 
 // Format currency
@@ -55,8 +81,18 @@ const formatCurrency = (amount, currency) => {
 
 // Calculate each user's share amount
 const shareAmount = (userId) => {
-    if (!form.amount || totalShare.value === 0) return 0;
-    return (form.shares[userId] / totalShare.value) * form.amount;
+    if (!form.amount) return 0;
+
+    if (form.split_method === 'equal') {
+        // For equal splitting, divide amount equally
+        return form.amount / props.participants.length;
+    } else if (form.split_method === 'percentage') {
+        // For percentage, calculate based on share percentage
+        return (form.shares[userId] / 100) * form.amount;
+    } else { // custom
+        // For custom, return the exact custom amount
+        return form.shares[userId] || 0;
+    }
 };
 
 const validationError = computed(() => {
@@ -80,11 +116,11 @@ const validationError = computed(() => {
 </script>
 
 <template>
-    <Head :title="`Add Expense to ${trip.title}`" />
+    <Head :title="`Add Expense to ${trip.title}`"/>
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-center">
+            <div class="flex justify-around items-center">
                 <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
                     Add Expense to {{ trip.title }}
                 </h2>
@@ -99,13 +135,15 @@ const validationError = computed(() => {
 
         <div class="py-6">
             <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden transition-colors duration-300">
+                <div
+                    class="bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden transition-colors duration-300">
                     <div class="p-6 border-b border-gray-200 dark:border-gray-700">
                         <div v-if="form.errors.shares" class="mb-4 text-red-600 dark:text-red-400">
                             {{ form.errors.shares }}
                         </div>
 
-                        <div v-if="validationError" class="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded">
+                        <div v-if="validationError"
+                             class="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded">
                             {{ validationError }}
                         </div>
 
@@ -125,7 +163,8 @@ const validationError = computed(() => {
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount</label>
                                     <div class="relative">
-                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 dark:text-gray-400">
+                                        <span
+                                            class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 dark:text-gray-400">
                                             {{ form.currency }}
                                         </span>
                                         <input
@@ -140,7 +179,8 @@ const validationError = computed(() => {
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
                                     <input
                                         type="date"
                                         v-model="form.date"
@@ -150,7 +190,8 @@ const validationError = computed(() => {
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Paid By</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Paid
+                                        By</label>
                                     <select
                                         v-model="form.paid_by"
                                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -166,7 +207,8 @@ const validationError = computed(() => {
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Split Method</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Split
+                                        Method</label>
                                     <select
                                         v-model="form.split_method"
                                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
@@ -182,16 +224,19 @@ const validationError = computed(() => {
                             <div class="mb-6">
                                 <h3 class="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">Split Details</h3>
                                 <div class="space-y-4">
-                                    <div v-for="participant in participants" :key="participant.id" class="flex items-center">
+                                    <div v-for="participant in participants" :key="participant.id"
+                                         class="flex items-center">
                                         <div class="w-1/3">
                                             <span class="text-gray-900 dark:text-gray-100">{{ participant.name }}</span>
-                                            <span v-if="participant.id === form.paid_by" class="ml-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+                                            <span v-if="participant.id === form.paid_by"
+                                                  class="ml-2 text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
                                                 Paid
                                             </span>
                                         </div>
 
                                         <div class="w-1/3">
-                                            <div v-if="form.split_method === 'equal'" class="text-gray-600 dark:text-gray-400">
+                                            <div v-if="form.split_method === 'equal'"
+                                                 class="text-gray-600 dark:text-gray-400">
                                                 {{ (100 / participants.length).toFixed(2) }}%
                                             </div>
 
@@ -214,8 +259,17 @@ const validationError = computed(() => {
                                         <div class="w-1/3 font-medium text-gray-900 dark:text-gray-100">Total</div>
                                         <div class="w-1/3">
                                             <span v-if="form.split_method === 'equal'">100%</span>
-                                            <span v-else class="font-medium" :class="{'text-green-600 dark:text-green-400': totalShare === 100, 'text-red-600 dark:text-red-400': totalShare !== 100}">
+                                            <span v-else-if="form.split_method === 'percentage'" class="font-medium"
+                                                  :class="{'text-green-600 dark:text-green-400': Math.abs(totalShare - 100) < 0.01,
+                                                            'text-red-600 dark:text-red-400': Math.abs(totalShare - 100) >= 0.01
+                                                          }">
                                                 {{ totalShare.toFixed(2) }}%
+                                            </span>
+                                            <span v-else class="font-medium" :class="{
+                                                 'text-green-600 dark:text-green-400': Math.abs(totalShare - form.amount) < 0.01,
+                                                 'text-red-600 dark:text-red-400': Math.abs(totalShare - form.amount) >= 0.01
+                                             }">
+                                                  {{ formatCurrency(totalShare, form.currency) }}
                                             </span>
                                         </div>
                                         <div class="w-1/3 text-right font-medium text-gray-900 dark:text-gray-100">
@@ -232,7 +286,7 @@ const validationError = computed(() => {
                                     :disabled="form.processing || !!validationError"
                                 >
                                     Add Expense
-                                </button>   
+                                </button>
                             </div>
                         </form>
                     </div>
